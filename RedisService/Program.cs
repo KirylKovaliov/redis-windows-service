@@ -94,10 +94,21 @@ namespace RedisService
 
         static void StopRedis()
         {
-            var pi = new ProcessStartInfo(Path.Combine(_path, RedisCLI)) { Arguments = (_port == 0 ? "" : String.Format("-p {0} ", _port)) + "shutdown" };
-
-            if (!(new Process { StartInfo = pi }).Start())
-                Exit("Failed to stop Redis process");
+            Process[] prs = Process.GetProcesses();
+            foreach (Process pr in prs)
+            {
+                if (pr.ProcessName == "redis-server")
+                {
+                    try
+                    {
+                        pr.Kill();
+                    }
+                    catch (Exception)
+                    {
+                        Exit("Failed to stop Redis process");
+                    }
+                }
+            }
         }
 
         static void Exit(string message)
